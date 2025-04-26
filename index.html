@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Digital Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --background: #f3f4f6;
+            --clock-bg: rgba(255, 255, 255, 0.9);
+            --text-color: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: var(--background);
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .header {
+            text-align: center;
+            padding: 1rem;
+            background: var(--clock-bg);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 6rem 2rem 2rem;
+        }
+
+        .clock {
+            background: var(--clock-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            width: 320px;
+            min-height: 320px;
+            transition: all 0.3s;
+        }
+
+        .clock.round {
+            border-radius: 50%;
+        }
+
+        .date-info {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .date-box, .day-box {
+            background: var(--primary-color);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .date-box div:first-child {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .date-box div:last-child {
+            font-size: 0.7rem;
+        }
+
+        .day-box div {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        #time {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-color);
+            display: flex;
+            gap: 0.2rem;
+            font-size: 2.4rem;
+        }
+
+        #seconds {
+            font-size: 1.2rem;
+            align-self: flex-end;
+            margin-bottom: 0.2rem;
+        }
+
+        .analog-clock {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            position: relative;
+            background: var(--clock-bg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+
+        .analog-number {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transform: rotate(var(--rotation));
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .analog-number span {
+            display: inline-block;
+            transform: rotate(calc(-1 * var(--rotation)));
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            border-radius: 5px;
+            z-index: 2;
+        }
+
+        .hour-hand {
+            width: 4px;
+            height: 40px;
+            background: var(--primary-color);
+        }
+
+        .minute-hand {
+            width: 3px;
+            height: 60px;
+            background: var(--text-color);
+        }
+
+        .second-hand {
+            width: 2px;
+            height: 70px;
+            background: #dc2626;
+        }
+
+        .center-circle {
+            width: 10px;
+            height: 10px;
+            background: var(--text-color);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .theme-picker {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 1000;
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .theme-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: transform 0.2s;
+        }
+
+        .theme-color:hover {
+            transform: scale(1.1);
+        }
+
+        #display-name {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-color);
+            font-size: 1rem;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .footer {
+            padding: 2rem;
+            background: var(--clock-bg);
+            margin-top: auto;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section p {
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Digital Clock</h1>
+    </header>
+
+    <div class="container">
+        <div class="theme-picker">
+            <div class="theme-color" style="background: #2563eb" onclick="changeTheme('#2563eb')"></div>
+            <div class="theme-color" style="background: #059669" onclick="changeTheme('#059669')"></div>
+            <div class="theme-color" style="background: #dc2626" onclick="changeTheme('#dc2626')"></div>
+            <div class="theme-color" style="background: #7c3aed" onclick="changeTheme('#7c3aed')"></div>
+        </div>
+
+        <button class="fullscreen-btn" onclick="toggleFullscreen()">
+            <i class="fas fa-expand"></i>
+        </button>
+
+        <div class="clock" id="clock">
+            <div class="digital-view">
+                <div class="date-info">
+                    <div class="date-box">
+                        <div id="date">31</div>
+                        <div id="month">DEC</div>
+                    </div>
+                    <div class="day-box">
+                        <div id="weekday">MON</div>
+                    </div>
+                </div>
+                <div id="time">
+                    <span id="hours">00</span>
+                    <span class="separator">:</span>
+                    <span id="minutes">00</span>
+                    <span id="seconds">00</span>
+                </div>
+                <div id="display-name"></div>
+            </div>
+
+            <div class="analog-clock hidden" id="analogClock">
+                <div class="hand hour-hand" id="hourHand"></div>
+                <div class="hand minute-hand" id="minuteHand"></div>
+                <div class="hand second-hand" id="secondHand"></div>
+                <div class="center-circle"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="toggleClockType()">
+                <i class="fas fa-clock"></i>
+                <span id="clockTypeText">Switch to Analog</span>
+            </button>
+            <button onclick="toggleShape()">
+                <i class="fas fa-shapes"></i>
+                Toggle Shape
+            </button>
+            <button onclick="toggleNameEditor()">
+                <i class="fas fa-edit"></i>
+                Edit Name
+            </button>
+        </div>
+
+        <div id="name-editor" class="hidden">
+            <input type="text" id="name-input" placeholder="Enter clock name">
+            <button onclick="saveName()">Save</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>Experience time like never before with our Smart Digital Clock. This feature-rich web application combines modern design with practical functionality, offering both digital and analog displays. Customize themes, switch between circular and square layouts, and personalize with your name. Perfect for all devices, it ensures accurate timekeeping with seconds display and fullscreen capability.</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Privacy Policy</h3>
+                <p>We value your privacy:</p>
+                <ul style="color: var(--text-color); padding-left: 1rem;">
+                    <li>No data collection or tracking</li>
+                    <li>All settings stored locally on your device</li>
+                    <li>No third-party cookies</li>
+                    <li>No registration required</li>
+                    <li>Full control over personalization data</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let isAnalog = false;
+        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+        function createAnalogNumbers() {
+            const analogClock = document.getElementById('analogClock');
+            for(let i = 1; i <= 12; i++) {
+                const number = document.createElement('div');
+                number.className = 'analog-number';
+                number.style.setProperty('--rotation', `${i * 30}deg`);
+                number.innerHTML = `<span>${i}</span>`;
+                analogClock.appendChild(number);
+            }
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            
+            document.getElementById('date').textContent = now.getDate();
+            document.getElementById('month').textContent = monthNames[now.getMonth()];
+            document.getElementById('weekday').textContent = dayNames[now.getDay()];
+            
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+            
+            if(isAnalog) updateAnalogClock(now);
+        }
+
+        function updateAnalogClock(now) {
+            const hours = now.getHours() % 12;
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            
+            const hourDeg = (hours * 30) + (minutes * 0.5);
+            const minuteDeg = (minutes * 6) + (seconds * 0.1);
+            const secondDeg = seconds * 6;
+            
+            document.getElementById('hourHand').style.transform = `rotate(${hourDeg}deg)`;
+            document.getElementById('minuteHand').style.transform = `rotate(${minuteDeg}deg)`;
+            document.getElementById('secondHand').style.transform = `rotate(${secondDeg}deg)`;
+        }
+
+        function toggleClockType() {
+            isAnalog = !isAnalog;
+            document.getElementById('clockTypeText').textContent = isAnalog ? 'Switch to Digital' : 'Switch to Analog';
+            document.querySelector('.digital-view').classList.toggle('hidden');
+            document.getElementById('analogClock').classList.toggle('hidden');
+            localStorage.setItem('clockType', isAnalog ? 'analog' : 'digital');
+        }
+
+        function toggleShape() {
+            document.getElementById('clock').classList.toggle('round');
+            localStorage.setItem('clockShape', document.getElementById('clock').classList.contains('round') ? 'round' : 'square');
+        }
+
+        function toggleNameEditor() {
+            document.getElementById('name-editor').classList.toggle('hidden');
+            document.getElementById('name-input').focus();
+        }
+
+        function saveName() {
+            const name = document.getElementById('name-input').value.trim();
+            if(name) {
+                document.getElementById('display-name').textContent = name;
+                localStorage.setItem('clockName', name);
+                document.getElementById('name-editor').classList.add('hidden');
+            }
+        }
+
+        function changeTheme(color) {
+            document.documentElement.style.setProperty('--primary-color', color);
+            localStorage.setItem('themeColor', color);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                document.querySelector('.fullscreen-btn i').classList.replace('fa-expand', 'fa-compress');
+            } else {
+                document.exitFullscreen();
+                document.querySelector('.fullscreen-btn i').classList.replace('fa-compress', 'fa-expand');
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                document.querySelector('.fullscreen-btn i').classList.replace('fa-compress', 'fa-expand');
+            }
+        });
+
+        function initSettings() {
+            const savedName = localStorage.getItem('clockName');
+            if(savedName) document.getElementById('display-name').textContent = savedName;
+            
+            if(localStorage.getItem('clockShape') === 'round') toggleShape();
+            
+            const savedTheme = localStorage.getItem('themeColor');
+            if(savedTheme) changeTheme(savedTheme);
+            
+            if(localStorage.getItem('clockType') === 'analog') toggleClockType();
+            
+            createAnalogNumbers();
+            setInterval(updateDateTime, 1000);
+            updateDateTime();
+        }
+
+        window.onload = initSettings;
+    </script>
+</body>
+</html>
